@@ -71,10 +71,72 @@ def build_price_map(catalogue_data, errors):
     return price_map
 
 
+def _is_flat_sales_format(sales_data):
+    """True if data is flat list of line items (SALE_ID, Product, Qty)."""
+    if not isinstance(sales_data, list) or len(sales_data) == 0:
+        return False
+    first = sales_data[0]
+    if not isinstance(first, dict):
+        return False
+    has_id = "SALE_ID" in first
+    has_product = "Product" in first or "product" in first
+    has_qty = "Quantity" in first or "quantity" in first
+    return has_id and has_product and has_qty
+
+
+def _process_flat_sales(sales_data, price_map, errors):
+    """
+    Process flat format: list of {SALE_ID, Product, Quantity}.
+    Returns list of (sale_id, total) grouped by SALE_ID.
+    """
+    results = []
+    sale_totals = {}
+    for idx, row in enumerate(sales_data):
+        if not isinstance(row, dict):
+            errors.append(f"Sales row {idx}: expected object.")
+            continue
+        sale_id = row.get("SALE_ID")
+        product = row.get("Product") or row.get("product")
+        quantity = row.get("Quantity") or row.get("quantity")
+        if product is None or quantity is None:
+            errors.append(
+                f"Sales row {idx}: missing 'Product'/'Quantity' or "
+                "'product'/'quantity'."
+            )
+            continue
+        try:
+            qty = int(quantity)
+            if qty < 0:
+                errors.append(
+                    f"Sales row {idx}: negative quantity for '{product}'."
+                )
+                continue
+        except (TypeError, ValueError):
+            errors.append(
+                f"Sales row {idx}: invalid quantity for '{product}'."
+            )
+            continue
+        product_key = str(product).strip()
+        if product_key not in price_map:
+            errors.append(
+                f"Sales row {idx}: product '{product}' not in catalogue."
+            )
+            continue
+        item_cost = price_map[product_key] * qty
+        if sale_id not in sale_totals:
+            sale_totals[sale_id] = 0.0
+        sale_totals[sale_id] += item_cost
+
+    for sale_id in sorted(sale_totals.keys()):
+        results.append((sale_id, sale_totals[sale_id]))
+    return results
+
+
 def compute_sale_total(items, price_map, sale_index, errors):
     """
     Compute total cost for one sale. Items must be a list of
-    objects with 'product' and 'quantity'. Returns (total, item_count).
+    objects with 'product' and 'quantity' (or 'Product'/'Quantity').
+    Returns (total, item_count).
     """
     total = 0.0
     item_count = 0
@@ -86,8 +148,8 @@ def compute_sale_total(items, price_map, sale_index, errors):
         if not isinstance(line_item, dict):
             errors.append(f"Sale {sale_index}, item {idx}: expected object.")
             continue
-        product = line_item.get("product")
-        quantity = line_item.get("quantity")
+        product = line_item.get("product") or line_item.get("Product")
+        quantity = line_item.get("quantity") or line_item.get("Quantity")
         if product is None or quantity is None:
             errors.append(
                 f"Sale {sale_index}, item {idx}: missing 'product' or "
@@ -125,14 +187,19 @@ def compute_sale_total(items, price_map, sale_index, errors):
 
 def compute_all_sales(sales_data, price_map, errors):
     """
-    Compute total cost for all sales. Expects a list of sales,
-    each with an 'items' array. Returns list of (sale_index, total).
+    Compute total cost for all sales. Supports:
+    - Flat format: list of {SALE_ID, Product, Quantity} (grouped by SALE_ID).
+    - Nested format: list of {items: [{product, quantity}, ...]}.
+    Returns list of (sale_id_or_index, total).
     """
-    results = []
     if not isinstance(sales_data, list):
         errors.append("Sales record must be a JSON array of sales.")
-        return results
+        return []
 
+    if _is_flat_sales_format(sales_data):
+        return _process_flat_sales(sales_data, price_map, errors)
+
+    results = []
     for sale_index, sale in enumerate(sales_data):
         if not isinstance(sale, dict):
             errors.append(
@@ -181,8 +248,10 @@ def print_and_write_results(
 
     lines.append("SALE BREAKDOWN")
     lines.append("-" * 60)
-    for sale_index, total in sale_results:
-        lines.append(f"  Sale #{sale_index}: {format_currency(total)}")
+    for sale_id_or_idx, total in sale_results:
+        lines.append(
+            f"  Sale #{sale_id_or_idx}: {format_currency(total)}"
+        )
     lines.append("-" * 60)
     lines.append(f"GRAND TOTAL: {format_currency(grand_total)}")
     lines.append("")
