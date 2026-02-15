@@ -1,0 +1,3 @@
+TC1: Ejecución normal con datos válidos
+Input: priceCatalogue.json, salesRecord.json
+Expected: Total calculado correctamente, salida en pantalla y SalesResults.txt, tiempo al final.

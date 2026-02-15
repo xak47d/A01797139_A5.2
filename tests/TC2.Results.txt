@@ -1,0 +1,27 @@
+TC2 - Datos inválidos (manejo de errores)
+Comando: python computeSales.py priceCatalogue.json salesRecord_invalid.json
+
+Salida: errores en consola y ejecución continúa
+============================================================
+SALES RESULTS
+============================================================
+
+WARNINGS / INVALID DATA (execution continued):
+------------------------------------------------------------
+  - Sale 0, item 1: product 'UnknownProduct' not in catalogue.
+  - Sale 0, item 2: negative quantity for 'Gadget'.
+  - Sale 0, item 3: missing 'product' or 'quantity'.
+
+------------------------------------------------------------
+
+SALE BREAKDOWN
+------------------------------------------------------------
+  Sale #0: 19.98
+------------------------------------------------------------
+GRAND TOTAL: 19.98
+
+============================================================
+Elapsed time: 0.000803 seconds
+============================================================
+
+Resultado: PASS - Errores mostrados, ejecución continuó, total parcial correcto (solo Widget x2).

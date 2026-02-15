@@ -1,0 +1,10 @@
+[
+  {
+    "items": [
+      {"product": "Widget", "quantity": 2},
+      {"product": "UnknownProduct", "quantity": 1},
+      {"product": "Gadget", "quantity": -1},
+      {"product": "Gizmo"}
+    ]
+  }
+]

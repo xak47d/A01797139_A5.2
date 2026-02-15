@@ -1,0 +1,20 @@
+[
+  {
+    "items": [
+      {"product": "Widget", "quantity": 2},
+      {"product": "Gadget", "quantity": 1}
+    ]
+  },
+  {
+    "items": [
+      {"product": "Gizmo", "quantity": 5},
+      {"product": "Doohickey", "quantity": 2}
+    ]
+  },
+  {
+    "items": [
+      {"product": "Thingamajig", "quantity": 3},
+      {"product": "Widget", "quantity": 1}
+    ]
+  }
+]

@@ -1,0 +1,3 @@
+TC2: Datos inválidos (producto inexistente, cantidad negativa, falta quantity)
+Input: priceCatalogue.json, salesRecord_invalid.json
+Expected: Errores mostrados en consola, ejecución continúa, total parcial en archivo y pantalla.

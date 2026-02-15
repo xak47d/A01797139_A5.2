@@ -1,0 +1,3 @@
+# For development and quality checks (PEP8, static analysis)
+flake8>=6.0.0
+pylint>=3.0.0

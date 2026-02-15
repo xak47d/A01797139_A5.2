@@ -1,0 +1,21 @@
+TC1 - Ejecución con datos válidos
+Comando: python computeSales.py priceCatalogue.json salesRecord.json
+
+Salida en pantalla y en SalesResults.txt:
+============================================================
+SALES RESULTS
+============================================================
+
+SALE BREAKDOWN
+------------------------------------------------------------
+  Sale #0: 39.48
+  Sale #1: 49.25
+  Sale #2: 33.24
+------------------------------------------------------------
+GRAND TOTAL: 121.97
+
+============================================================
+Elapsed time: 0.000346 seconds
+============================================================
+
+Resultado: PASS - Total correcto, tiempo mostrado, archivo generado.
